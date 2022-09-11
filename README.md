@@ -12,6 +12,19 @@ Test image obtained from: https://www.opsweb.org/page/fundusimaging
 
 TODO
 
+### Results
+
+DeepLabV3+ Model trained on DRIVE dataset only.
+
+|                   |  Dice   | Sensitivity | Specificity |   AUC   |
+|:------------------|:-------:|:-----------:|:-----------:|:-------:|
+| DRIVE             | 0.76198 |   0.78165   |   0.97600   | 0.95197 |
+| CHASE_DB1 (1stHO) | 0.72111 |   0.80264   |   0.97074   | 0.95793 |
+| CHASE_DB1 (2ndHO) | 0.71033 |   0.80751   |   0.96838   | 0.96093 |
+| STARE (ah)        | 0.73415 |   0.83960   |   0.97117   | 0.96797 | 
+| STARE (vk)        | 0.71110 |   0.67829   |   0.98133   | 0.91613 |
+
+
 ### Run Model
 ```
 usage: run_segmentation.py [-h] [-i INPUT_FN] [-o OUTPUT_FN] [-m MODEL_FN] [-v]
