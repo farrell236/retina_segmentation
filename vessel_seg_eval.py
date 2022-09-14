@@ -63,7 +63,7 @@ model.compile(
 
 root_dir = '/vol/biomedic3/bh1511/retina/DRIVE/preprocessed'
 test_df = pd.read_csv(os.path.join(root_dir, 'test_list.csv'))
-test_df = root_dir + '/DRIVE_test/' + test_df[['image', 'label']]
+test_df = root_dir + '/DRIVE_test/' + test_df[['image', 'label']]  # use 'label1' for 2ndHO
 
 test_images = []
 test_labels = []
@@ -75,7 +75,7 @@ for idx, row in tqdm.tqdm(test_df.iterrows()):
     image[:, :, 0] = clahe.apply(image[:, :, 0])
     image = cv2.cvtColor(image, cv2.COLOR_LAB2RGB)
     test_images.append(image)
-    test_labels.append(cv2.imread(row['label']))
+    test_labels.append(cv2.imread(row['label']))  # use 'label1' for 2ndHO
 
 drive_test_ds = tf.data.Dataset.from_tensor_slices((test_images, test_labels))
 drive_test_ds = drive_test_ds.map(normalize)
@@ -84,10 +84,10 @@ drive_test_ds = drive_test_ds.batch(1)
 results = model.evaluate(drive_test_ds)
 
 print(f'--- Results DRIVE ---')
-print(f'Dice: {results[10]}')  # 0.76198
-print(f'Sensitivity: {results[1] / (results[1] + results[4])}')  # 0.78165
-print(f'Specificity: {results[3] / (results[2] + results[3])}')  # 0.97600
-print(f'AUC: {results[8]}')  # 0.95197
+print(f'Dice: {results[10]}')  # 0.76198, 0.77084
+print(f'Sensitivity: {results[1] / (results[1] + results[4])}')  # 0.78165, 0.80767
+print(f'Specificity: {results[3] / (results[2] + results[3])}')  # 0.97600, 0.97565
+print(f'AUC: {results[8]}')  # 0.95197, 0.95944
 
 
 ########## CHASE_DB1 ###################################################################################################
