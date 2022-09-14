@@ -2,9 +2,13 @@
 
 TODO
 
+<div align="center">
+
 |          Fundus Image          |        Predicted Vessel Segmentation        | 
 |:------------------------------:|:-------------------------------------------:|
 | ![](assets/ret-hem250-304.jpg) | ![](assets/ret-hem250-304_segmentation.jpg) |
+
+</div>
 
 Test image obtained from: https://www.opsweb.org/page/fundusimaging
 
