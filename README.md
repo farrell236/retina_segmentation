@@ -28,6 +28,7 @@ DeepLabV3+ Model trained on DRIVE dataset only (with 5-Fold Cross Validation).
 | CHASE_DB1 (2ndHO) | 0.687 (0.021) | 0.756 (0.080) | 0.971 (0.007) | 0.952 (0.013) | 
 | STARE (ah)        | 0.726 (0.004) | 0.724 (0.021) | 0.977 (0.002) | 0.940 (0.004) |  
 | STARE (vk)        | 0.701 (0.007) | 0.662 (0.025) | 0.982 (0.002) | 0.919 (0.008) | 
+
 `()` denotes Confidence Interval at 95%
 
 ### Run Model
