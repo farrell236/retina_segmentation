@@ -96,6 +96,7 @@ if __name__ == '__main__':
     model = tf.keras.models.load_model(args['model_fn'], compile=False)
     y_pred = model(image[None, ..., None])[0].numpy()
 
+    # Overlay segmentation on original image
     y_pred = cv2.resize(y_pred, image_shape[:-1], interpolation=cv2.INTER_NEAREST)
     y_pred = y_pred[t_pad:y_pred.shape[0]-b_pad, l_pad:y_pred.shape[1]-r_pad]
     canvas = np.zeros(original_image.shape[:-1])

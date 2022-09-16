@@ -14,12 +14,28 @@ def load_model(model_file):
     return model
 
 
+@st.cache(allow_output_mutation=True)
+def load_gatekeeper():
+    validator_model = tf.keras.models.load_model('EyeQ/ResNetV2-EyeQ-QA.tf')
+    print('Gatekeeper Model Loaded!')
+    return validator_model
+
+
+def parse_function(image):
+    image = tf.image.resize(image, [512, 512])
+    image = tf.image.convert_image_dtype(image, tf.float32)
+    return image
+
+
 def main():
 
     st.title('Retina Segmentation')
 
     st.sidebar.title('Segmentation Model')
-    options = st.sidebar.selectbox('Select Option:', ('Vessels', 'Lesions'))
+    options = st.sidebar.selectbox('Select Option:', ('Vessels', 'Lesions (BETA)'))
+    gatekeeper = st.sidebar.radio("Gatekeeper:", ('Enabled', 'Disabled'))
+
+    gatekeeper_model = load_gatekeeper()
 
     if options == 'Vessels':
 
@@ -35,6 +51,13 @@ def main():
             file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
             image = cv2.imdecode(file_bytes, 1)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+            # Check image
+            valid = np.argmax(gatekeeper_model(parse_function(image[None, ...])))
+            if valid == 2 and gatekeeper == 'Enabled':
+                st.image(image)
+                st.info('Image is of poor quality')
+                return
 
             # Localise and center retina image
             x, y, w, h, _ = _get_retina_bb(image)
@@ -61,7 +84,7 @@ def main():
                 st.subheader("Predicted Vessel")
                 st.image(y_pred)
 
-    elif options == 'Lesions':
+    elif options == 'Lesions (BETA)':
 
         st.write('```--- WARNING: This model is highly experimental ---```')
 
@@ -77,6 +100,13 @@ def main():
             file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
             image = cv2.imdecode(file_bytes, 1)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+            # Check image
+            valid = np.argmax(gatekeeper_model(parse_function(image[None, ...])))
+            if valid == 2 and gatekeeper == 'Enabled':
+                st.image(image)
+                st.info('Image is of poor quality')
+                return
 
             # Localise and center retina image
             x, y, w, h, _ = _get_retina_bb(image)
