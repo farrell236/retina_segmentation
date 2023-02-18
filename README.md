@@ -1,6 +1,8 @@
-# Retina Vessel Segmentation
+# Domain Agnostic Pipeline for Retina Vessel Segmentation
 
-TODO
+[![sd](https://img.shields.io/badge/Abstract-arXiv-red)]()
+[![sd](https://img.shields.io/badge/Demo-Streamlit-blue)](http://lazarus.ddns.net:8502)
+[![sd](https://img.shields.io/badge/Model_Weights-download-blueviolet)]()
 
 <div align="center">
 
@@ -12,9 +14,15 @@ TODO
 
 Test image obtained from: https://www.opsweb.org/page/fundusimaging
 
-### Segmentation Pipeline
+### Retina Image Standardization
 
-TODO
+<div align="center">
+
+![](assets/retina_localization.png)
+
+</div>
+
+The captured retina photo is first turned into grayscale, where it is thresholded by 1/3 of the mean pixel intensity to get a preliminary mask. The mask is then cleaned by a median blur filter (ks=25), followed by 2 iterations of erode and 2 iterations of dilate to remove any speckle that may arise from the edges. Finally, the bounding box for the retina can then be inferred by the contour edge of the mask, which can then be padded to square.
 
 ### Results
 
@@ -70,5 +78,10 @@ tqdm==4.36.1
 ### References
 
 ```
-TODO
+@article{hou2022vesselseg,
+  title={Domain Agnostic Pipeline for Retina Vessel Segmentation},
+  author={Hou, Benjamin},
+  journal={preprint},
+  year={2022}
+}
 ```
