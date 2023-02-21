@@ -1,10 +1,10 @@
 # Domain Agnostic Pipeline for Retina Vessel Segmentation
 
-[![sd](https://img.shields.io/badge/Abstract-arXiv-red)]()
-[![sd](https://img.shields.io/badge/Demo-Streamlit-blue)](http://lazarus.ddns.net:8502)
-[![sd](https://img.shields.io/badge/Model_Weights-download-blueviolet)]()
-
 <div align="center">
+
+[![sd](https://img.shields.io/badge/Abstract-arXiv-red)](https://arxiv.org/abs/2302.09215)
+[![sd](https://img.shields.io/badge/Demo-Streamlit-blue)](http://lazarus.ddns.net:8502)
+[![sd](https://img.shields.io/badge/Model_Weights-download-orange)]()
 
 |          Fundus Image          |        Predicted Vessel Segmentation        | 
 |:------------------------------:|:-------------------------------------------:|
@@ -78,10 +78,10 @@ tqdm==4.36.1
 ### References
 
 ```
-@article{hou2022vesselseg,
+@article{hou2023vesselseg,
   title={Domain Agnostic Pipeline for Retina Vessel Segmentation},
   author={Hou, Benjamin},
-  journal={preprint},
-  year={2022}
+  journal={arXiv},
+  year={2023}
 }
 ```
