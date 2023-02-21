@@ -6,7 +6,7 @@
 
 [![sd](https://img.shields.io/badge/Abstract-arXiv-red)](https://arxiv.org/abs/2302.09215)
 [![sd](https://img.shields.io/badge/Demo-Streamlit-blue)](http://lazarus.ddns.net:8502)
-[![sd](https://img.shields.io/badge/Model_Weights-download-orange)]()
+[![sd](https://img.shields.io/badge/Model_Weights-download-orange)](checkpoints/README.md)
 
 |       Fundus Image       |     Predicted Vessel Segmentation     | 
 |:------------------------:|:-------------------------------------:|

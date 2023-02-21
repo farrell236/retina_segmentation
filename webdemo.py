@@ -27,7 +27,7 @@ def load_model(model_file):
 
 @st.cache(allow_output_mutation=True)
 def load_gatekeeper():
-    validator_model = tf.keras.models.load_model('EyeQ/ResNetV2-EyeQ-QA.tf')
+    validator_model = tf.keras.models.load_model('checkpoints/ResNetV2-EyeQ-QA.tf')
     print('Gatekeeper Model Loaded!')
     return validator_model
 
@@ -47,7 +47,7 @@ def main():
     gatekeeper = st.sidebar.radio("Gatekeeper:", ('Enabled', 'Disabled'))
 
     gatekeeper_model = load_gatekeeper()
-    models = load_xval_models('CI/DeeplabV3Plus_FIVES')
+    models = load_xval_models('checkpoints/DeeplabV3Plus_FIVES')
 
     if options == 'Vessels':
 
