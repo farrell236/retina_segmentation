@@ -1,18 +1,20 @@
 # Domain Agnostic Pipeline for Retina Vessel Segmentation
 
+**This branch trains the model on [FIVES dataset](https://doi.org/10.6084/m9.figshare.19688169.v1).**
+
 <div align="center">
 
 [![sd](https://img.shields.io/badge/Abstract-arXiv-red)](https://arxiv.org/abs/2302.09215)
 [![sd](https://img.shields.io/badge/Demo-Streamlit-blue)](http://lazarus.ddns.net:8502)
 [![sd](https://img.shields.io/badge/Model_Weights-download-orange)]()
 
-|          Fundus Image          |        Predicted Vessel Segmentation        | 
-|:------------------------------:|:-------------------------------------------:|
-| ![](assets/ret-hem250-304.jpg) | ![](assets/ret-hem250-304_segmentation.jpg) |
+|       Fundus Image       |     Predicted Vessel Segmentation     | 
+|:------------------------:|:-------------------------------------:|
+|![](assets/image-51.jpeg) |![](assets/image-51_segmentation.jpeg) |
 
 </div>
 
-Test image obtained from: https://www.opsweb.org/page/fundusimaging
+Test image obtained from: [syncedreview.com](https://syncedreview.com/2018/02/20/its-all-in-the-eyes-google-ai-calculates-cardiovascular-risk-from-retinal-images/)
 
 ### Retina Image Standardization
 
@@ -30,12 +32,13 @@ DeepLabV3+ Model trained on DRIVE dataset only (with 5-Fold Cross Validation).
 
 |                   |     Dice      |  Sensitivity  |  Specificity  |      AUC      |
 |:------------------|:-------------:|:-------------:|:-------------:|:-------------:|
-| DRIVE (1stHO)     | 0.757 (0.001) | 0.795 (0.005) | 0.974 (0.000) | 0.963 (0.000) | 
-| DRIVE (2ndHO)     | 0.766 (0.001) | 0.814 (0.007) | 0.974 (0.001) | 0.968 (0.001) | 
-| CHASE_DB1 (1stHO) | 0.699 (0.024) | 0.774 (0.051) | 0.972 (0.004) | 0.955 (0.010) | 
-| CHASE_DB1 (2ndHO) | 0.687 (0.021) | 0.756 (0.080) | 0.971 (0.007) | 0.952 (0.013) | 
-| STARE (ah)        | 0.726 (0.004) | 0.724 (0.021) | 0.977 (0.002) | 0.940 (0.004) |  
-| STARE (vk)        | 0.701 (0.007) | 0.662 (0.025) | 0.982 (0.002) | 0.919 (0.008) | 
+| FIVES             | 0.840 (0.001) | 0.881 (0.002) | 0.990 (0.000) | 0.977 (0.000) |
+| DRIVE (1stHO)     | 0.776 (0.001) | 0.789 (0.015) | 0.975 (0.002) | 0.933 (0.005) | 
+| DRIVE (2ndHO)     | 0.791 (0.001) | 0.820 (0.015) | 0.976 (0.002) | 0.946 (0.004) | 
+| CHASE_DB1 (1stHO) | 0.786 (0.008) | 0.871 (0.021) | 0.973 (0.002) | 0.966 (0.001) | 
+| CHASE_DB1 (2ndHO) | 0.765 (0.006) | 0.868 (0.019) | 0.970 (0.002) | 0.964 (0.002) | 
+| STARE (ah)        | 0.774 (0.014) | 0.793 (0.022) | 0.983 (0.001) | 0.952 (0.007) |  
+| STARE (vk)        | 0.708 (0.016) | 0.612 (0.202) | 0.990 (0.001) | 0.881 (0.009) | 
 
 `()` denotes Confidence Interval at 95%
 

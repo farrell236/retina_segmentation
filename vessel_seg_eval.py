@@ -52,47 +52,60 @@ METRICS = [
 ]
 
 
-model = tf.keras.models.load_model('checkpoints/DeeplabV3Plus_DRIVE.tf', compile=False)
+model = tf.keras.models.load_model('CI/DeeplabV3Plus_FIVES_4.tf', compile=False)
 model.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
     loss=combined_loss,
     metrics=METRICS)
 
+a=1
 
 ########## DRIVE #######################################################################################################
 
-root_dir = '/vol/biomedic3/bh1511/retina/DRIVE/preprocessed'
+root_dir = '/mnt/nas_houbb/users/Benjamin/data/retina/DRIVE/preprocessed2'
 test_df = pd.read_csv(os.path.join(root_dir, 'test_list.csv'))
-test_df = root_dir + '/DRIVE_test/' + test_df[['image', 'label']]  # use 'label1' for 2ndHO
+test_df = root_dir + '/DRIVE_test/' + test_df[['image', 'label', 'label1']]
 
 test_images = []
-test_labels = []
+test_labels_1 = []
+test_labels_2 = []
 
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(16, 16))
-for idx, row in tqdm.tqdm(test_df.iterrows()):
+for idx, row in tqdm.tqdm(test_df.iterrows(), total=len(test_df)):
     image = cv2.imread(row['image'])
     image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     image[:, :, 0] = clahe.apply(image[:, :, 0])
     image = cv2.cvtColor(image, cv2.COLOR_LAB2RGB)
     test_images.append(image)
-    test_labels.append(cv2.imread(row['label']))  # use 'label1' for 2ndHO
+    test_labels_1.append(cv2.imread(row['label']))
+    test_labels_2.append(cv2.imread(row['label1']))
 
-drive_test_ds = tf.data.Dataset.from_tensor_slices((test_images, test_labels))
-drive_test_ds = drive_test_ds.map(normalize)
-drive_test_ds = drive_test_ds.batch(1)
+drive_test_ds_1 = tf.data.Dataset.from_tensor_slices((test_images, test_labels_1))
+drive_test_ds_1 = drive_test_ds_1.map(normalize)
+drive_test_ds_1 = drive_test_ds_1.batch(1)
 
-results = model.evaluate(drive_test_ds)
+drive_test_ds_2 = tf.data.Dataset.from_tensor_slices((test_images, test_labels_2))
+drive_test_ds_2 = drive_test_ds_2.map(normalize)
+drive_test_ds_2 = drive_test_ds_2.batch(1)
 
-print(f'--- Results DRIVE ---')
-print(f'Dice: {results[10]}')  # 0.76198, 0.77084
-print(f'Sensitivity: {results[1] / (results[1] + results[4])}')  # 0.78165, 0.80767
-print(f'Specificity: {results[3] / (results[2] + results[3])}')  # 0.97600, 0.97565
-print(f'AUC: {results[8]}')  # 0.95197, 0.95944
+results_1 = model.evaluate(drive_test_ds_1, verbose=True)
+results_2 = model.evaluate(drive_test_ds_2, verbose=True)
 
+print(f'--- Results DRIVE (1stHO) ---')
+print(f'Dice: {results_1[10]}')
+print(f'Sensitivity: {results_1[1] / (results_1[1] + results_1[4])}')
+print(f'Specificity: {results_1[3] / (results_1[2] + results_1[3])}')
+print(f'AUC: {results_1[8]}')
+
+print(f'--- Results DRIVE (2ndHO) ---')
+print(f'Dice: {results_2[10]}')
+print(f'Sensitivity: {results_2[1] / (results_2[1] + results_2[4])}')
+print(f'Specificity: {results_2[3] / (results_2[2] + results_2[3])}')
+print(f'AUC: {results_2[8]}')
 
 ########## CHASE_DB1 ###################################################################################################
 
-root_dir = '/vol/biomedic3/bh1511/retina/CHASE_DB1/images_processed'
+root_dir = '/mnt/nas_houbb/users/Benjamin/data/retina/CHASE_DB1/images_processed'
 file_id = ['Image_01L', 'Image_01R', 'Image_02L', 'Image_02R', 'Image_03L',
            'Image_03R', 'Image_04L', 'Image_04R', 'Image_05L', 'Image_05R',
            'Image_06L', 'Image_06R', 'Image_07L', 'Image_07R', 'Image_08L',
@@ -125,25 +138,25 @@ chasedb1_2ndHO_ds = tf.data.Dataset.from_tensor_slices((chasedb1_images, chasedb
 chasedb1_2ndHO_ds = chasedb1_2ndHO_ds.map(normalize)
 chasedb1_2ndHO_ds = chasedb1_2ndHO_ds.batch(1)
 
-results1 = model.evaluate(chasedb1_1stHO_ds)
-results2 = model.evaluate(chasedb1_2ndHO_ds)
+results1 = model.evaluate(chasedb1_1stHO_ds, verbose=True)
+results2 = model.evaluate(chasedb1_2ndHO_ds, verbose=True)
 
 print(f'--- Results CHASE_DB1 (1stHO) ---')
-print(f'Dice: {results1[10]}')  # 0.72111
-print(f'Sensitivity: {results1[1] / (results1[1] + results1[4])}')  # 0.80264
-print(f'Specificity: {results1[3] / (results1[2] + results1[3])}')  # 0.97074
-print(f'AUC: {results1[8]}')  # 0.95793
+print(f'Dice: {results1[10]}')
+print(f'Sensitivity: {results1[1] / (results1[1] + results1[4])}')
+print(f'Specificity: {results1[3] / (results1[2] + results1[3])}')
+print(f'AUC: {results1[8]}')
 
 print(f'--- Results CHASE_DB1 (2ndHO) ---')
-print(f'Dice: {results2[10]}')  # 0.71033
-print(f'Sensitivity: {results2[1] / (results2[1] + results2[4])}')  # 0.80751
-print(f'Specificity: {results2[3] / (results2[2] + results2[3])}')  # 0.96838
-print(f'AUC: {results2[8]}')  # 0.96093
+print(f'Dice: {results2[10]}')
+print(f'Sensitivity: {results2[1] / (results2[1] + results2[4])}')
+print(f'Specificity: {results2[3] / (results2[2] + results2[3])}')
+print(f'AUC: {results2[8]}')
 
 
 ########## STARE #######################################################################################################
 
-root_dir = '/vol/biomedic3/bh1511/retina/STARE'
+root_dir = '/mnt/nas_houbb/users/Benjamin/data/retina/STARE'
 file_id = ['im0001', 'im0002', 'im0003', 'im0004', 'im0005',
            'im0044', 'im0077', 'im0081', 'im0082', 'im0139',
            'im0162', 'im0163', 'im0235', 'im0236', 'im0239',
@@ -175,17 +188,50 @@ stare_vk_ds = tf.data.Dataset.from_tensor_slices((stare_images, stare_label2))
 stare_vk_ds = stare_vk_ds.map(normalize)
 stare_vk_ds = stare_vk_ds.batch(1)
 
-results1 = model.evaluate(stare_ah_ds)
-results2 = model.evaluate(stare_vk_ds)
+results1 = model.evaluate(stare_ah_ds, verbose=True)
+results2 = model.evaluate(stare_vk_ds, verbose=True)
 
 print(f'--- Results STARE (ah) ---')
-print(f'Dice: {results1[10]}')  # 0.73415
-print(f'Sensitivity: {results1[1] / (results1[1] + results1[4])}')  # 0.83960
-print(f'Specificity: {results1[3] / (results1[2] + results1[3])}')  # 0.97117
-print(f'AUC: {results1[8]}')  # 0.96797
+print(f'Dice: {results1[10]}')
+print(f'Sensitivity: {results1[1] / (results1[1] + results1[4])}')
+print(f'Specificity: {results1[3] / (results1[2] + results1[3])}')
+print(f'AUC: {results1[8]}')
 
 print(f'--- Results STARE (vk) ---')
-print(f'Dice: {results2[10]}')  # 0.71110
-print(f'Sensitivity: {results2[1] / (results2[1] + results2[4])}')  # 0.67829
-print(f'Specificity: {results2[3] / (results2[2] + results2[3])}')  # 0.98133
-print(f'AUC: {results2[8]}')  # 0.91613
+print(f'Dice: {results2[10]}')
+print(f'Sensitivity: {results2[1] / (results2[1] + results2[4])}')
+print(f'Specificity: {results2[3] / (results2[2] + results2[3])}')
+print(f'AUC: {results2[8]}')
+
+
+########## FIVES #######################################################################################################
+
+root_dir = '/mnt/nas_houbb/users/Benjamin/data/retina/FIVES_dataset'
+test_df = pd.read_csv(os.path.join(root_dir, 'test.csv'))
+
+test_images = []
+test_labels = []
+
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(16, 16))
+for idx, row in tqdm.tqdm(test_df.iterrows(), total=len(test_df)):
+    image = os.path.join(root_dir, 'test/images', row['File Name'])
+    image = cv2.imread(image)[::2, ::2, :]
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    image[:, :, 0] = clahe.apply(image[:, :, 0])
+    image = cv2.cvtColor(image, cv2.COLOR_LAB2RGB)
+    test_images.append(image)
+    label = os.path.join(root_dir, 'test/labels', row['File Name'])
+    label = (cv2.imread(label)[::2, ::2, :] == 255).astype('uint8')
+    test_labels.append(label)
+
+fives_test_ds = tf.data.Dataset.from_tensor_slices((test_images, test_labels))
+fives_test_ds = fives_test_ds.map(normalize)
+fives_test_ds = fives_test_ds.batch(1)
+
+results = model.evaluate(fives_test_ds, verbose=True)
+
+print(f'--- Results FIVES ---')
+print(f'Dice: {results[10]}')
+print(f'Sensitivity: {results[1] / (results[1] + results[4])}')
+print(f'Specificity: {results[3] / (results[2] + results[3])}')
+print(f'AUC: {results[8]}')

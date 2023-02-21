@@ -1,12 +1,11 @@
 import os
-os.environ['WANDB_CACHE_DIR'] = '/vol/medic01/users/bh1511/wandb'
+# os.environ['WANDB_CACHE_DIR'] = '/vol/medic01/users/bh1511/wandb'
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'   # see issue #152
-# os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 import cv2
 import math
-import tqdm
 
 import numpy as np
 import pandas as pd
@@ -17,18 +16,18 @@ from matplotlib import pyplot as plt
 
 from models.DeeplabV3Plus import DeeplabV3Plus
 from sklearn.model_selection import KFold
+from tqdm import tqdm
 
-import wandb
-from wandb.keras import WandbCallback
+# import wandb
+# from wandb.keras import WandbCallback
 
 
 
 a=1
 
 
-root_dir = '/vol/biomedic3/bh1511/retina/DRIVE/preprocessed'
-train_df = pd.read_csv(os.path.join(root_dir, 'train_list.csv'))
-train_df = root_dir + '/DRIVE_train/' + train_df[['image', 'label']]
+root_dir = '/mnt/nas_houbb/users/Benjamin/data/FIVES_dataset'
+train_df = pd.read_csv(os.path.join(root_dir, 'train.csv'))
 
 
 a=1
@@ -37,13 +36,16 @@ images = []
 labels = []
 
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(16, 16))
-for idx, row in tqdm.tqdm(train_df.iterrows()):
-    image = cv2.imread(row['image'])
+for idx, row in tqdm(train_df.iterrows(), total=len(train_df)):
+    image = os.path.join(root_dir, 'train/images', row['File Name'])
+    image = cv2.imread(image)[::2, ::2, :]
     image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     image[:, :, 0] = clahe.apply(image[:, :, 0])
     image = cv2.cvtColor(image, cv2.COLOR_LAB2RGB)
     images.append(image)
-    labels.append(cv2.imread(row['label']))
+    label = os.path.join(root_dir, 'train/labels', row['File Name'])
+    label = (cv2.imread(label)[::2, ::2, :] == 255).astype('uint8')
+    labels.append(label)
 
 images = np.stack(images, axis=0)
 labels = np.stack(labels, axis=0)
@@ -142,16 +144,18 @@ for idx, (train_index, test_index) in enumerate(kf.split(images)):
     X_train, X_test = images[train_index], images[test_index]
     y_train, y_test = labels[train_index], labels[test_index]
 
-    wandb.init(project='DR-Segmentation', entity="farrell236", group="x-val", name=f'fold_{idx}')
+    if idx in [0, 1, 2]: continue
+
+    # wandb.init(project='DR-Segmentation', entity="farrell236", group="x-val", name=f'fold_{idx}')
 
     train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))
     train_dataset = train_dataset.shuffle(len(train_dataset))
     train_dataset = train_dataset.map(load_image_train, num_parallel_calls=tf.data.AUTOTUNE)
-    train_dataset = train_dataset.batch(2)
+    train_dataset = train_dataset.batch(4)
 
     valid_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test))
     valid_dataset = valid_dataset.map(load_image_test, num_parallel_calls=tf.data.AUTOTUNE)
-    valid_dataset = valid_dataset.batch(2)
+    valid_dataset = valid_dataset.batch(4)
 
 
     model = DeeplabV3Plus((1024, 1024, 1), 1, activation='sigmoid')
@@ -165,7 +169,7 @@ for idx, (train_index, test_index) in enumerate(kf.split(images)):
         loss=combined_loss,
         metrics=[dice_coef])
     checkpoint = tf.keras.callbacks.ModelCheckpoint(
-        filepath=f'CI/DeeplabV3Plus_DRIVE_{idx}.tf',
+        filepath=f'CI/DeeplabV3Plus_FIVES_{idx}.tf',
         monitor='val_dice_coef', mode='max', verbose=1, save_best_only=True)
     model.fit(
         train_dataset,
@@ -173,7 +177,8 @@ for idx, (train_index, test_index) in enumerate(kf.split(images)):
         steps_per_epoch=len(train_dataset),
         validation_steps=len(valid_dataset),
         epochs=2000,
-        callbacks=[checkpoint, WandbCallback()]
+        # callbacks=[checkpoint, WandbCallback()
+        callbacks = [checkpoint]
     )
 
 
@@ -183,4 +188,4 @@ for idx, (train_index, test_index) in enumerate(kf.split(images)):
     del train_dataset
     del valid_dataset
 
-    wandb.join()
+    # wandb.join()

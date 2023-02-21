@@ -8,6 +8,17 @@ from preprocessing.utils import _get_retina_bb, _pad_to_square
 
 
 @st.cache(allow_output_mutation=True)
+def load_xval_models(model_file, n=5):
+
+    models = [
+        tf.keras.models.load_model(f'{model_file}_{i}.tf', compile=False)
+        for i in range(n)
+    ]
+    print(f'Model {model_file} Loaded!')
+    return models
+
+
+@st.cache(allow_output_mutation=True)
 def load_model(model_file):
     model = tf.keras.models.load_model(model_file, compile=False)
     print(f'Model {model_file} Loaded!')
@@ -36,13 +47,12 @@ def main():
     gatekeeper = st.sidebar.radio("Gatekeeper:", ('Enabled', 'Disabled'))
 
     gatekeeper_model = load_gatekeeper()
+    models = load_xval_models('CI/DeeplabV3Plus_FIVES')
 
     if options == 'Vessels':
 
         st.set_option('deprecation.showfileUploaderEncoding', False)
         uploaded_file = st.file_uploader('Choose an image...', type=('png', 'jpg', 'jpeg'))
-
-        model = load_model('checkpoints/DeeplabV3Plus_DRIVE.tf')
 
         if uploaded_file:
             col1, col2 = st.columns(2)
@@ -78,7 +88,11 @@ def main():
             image = tf.image.convert_image_dtype(image, tf.float32)
 
             # Run model on input
-            y_pred = model(image[None, ..., None])[0].numpy()
+            y_pred = []
+            for i in range(5):
+                y_pred.append(models[i](image[None, ..., None])[0].numpy())
+            y_pred = np.clip(np.sum(y_pred, axis=0), 0, 1)
+            # y_pred = np.mean(y_pred, axis=0)
 
             with col2:
                 st.subheader("Predicted Vessel")
@@ -146,6 +160,6 @@ def main():
 
 if __name__ == '__main__':
 
-    tf.config.set_visible_devices([], 'GPU')
+    # tf.config.set_visible_devices([], 'GPU')
 
     main()
